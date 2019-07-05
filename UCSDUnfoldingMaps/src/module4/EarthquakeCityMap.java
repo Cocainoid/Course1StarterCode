@@ -13,6 +13,7 @@ import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
@@ -20,7 +21,7 @@ import processing.core.PApplet;
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
  * Author: UC San Diego Intermediate Software Development MOOC team
- * @author Your name here
+ * @author Abdrashitov Andrei
  * Date: July 17, 2015
  * */
 public class EarthquakeCityMap extends PApplet {
@@ -38,12 +39,10 @@ public class EarthquakeCityMap extends PApplet {
 	private static final boolean offline = false;
 	
 	/** This is where to find the local tiles, for working without an Internet connection */
-	public static String mbTilesString = "blankLight-1-3.mbtiles";
-	
-	
+	public static String mbTilesString = "blankLight-1-3.mbtiles";	
 
 	//feed with magnitude 2.5+ Earthquakes
-	private String earthquakesURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.atom";
+	private String earthquakesURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.atom";
 	
 	// The files containing city names and info and country names and info
 	private String cityFile = "city-data.json";
@@ -68,7 +67,7 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.RoadProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -111,7 +110,7 @@ public class EarthquakeCityMap extends PApplet {
 	    }
 
 	    // could be used for debugging
-	    printQuakes();
+	    //printQuakes();
 	 		
 	    // (3) Add markers to map
 	    //     NOTE: Country markers are not added to the map.  They are used
@@ -170,9 +169,9 @@ public class EarthquakeCityMap extends PApplet {
 		// If isInCountry ever returns true, isLand should return true.
 		for (Marker m : countryMarkers) {
 			// TODO: Finish this method using the helper method isInCountry
-			
-		}
-		
+			if ( isInCountry(earthquake, m ) )
+				return true;					
+		}		
 		
 		// not inside any country
 		return false;
@@ -190,6 +189,27 @@ public class EarthquakeCityMap extends PApplet {
 		// One (inefficient but correct) approach is to:
 		//   Loop over all of the countries, e.g. using 
 		//        for (Marker cm : countryMarkers) { ... }
+		for (Marker cm : countryMarkers)
+		{			
+			int quakeCount = 0;			
+			
+			for (Marker m : quakeMarkers)
+			{				
+				EarthquakeMarker em = (EarthquakeMarker) m;	
+				String name    = (String) cm.getProperty("name");
+				String country = (String) m.getProperty("country");
+				
+				if ( em.isOnLand() && country.equals(name))
+				{					
+				  quakeCount++;
+				  
+				  if (quakeCount > 1)
+					  System.out.println(name + ": " + quakeCount);
+				}					
+				
+			}
+			
+		}
 		//        
 		//      Inside the loop, first initialize a quake counter.
 		//      Then loop through all of the earthquake
